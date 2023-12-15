@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Однорукий бандит</title>
+  <style>
+    body {
+      background-color: #111;
+      color: #fff;
+      font-family: 'Arial', sans-serif;
+      text-align: center;
+    }
+
+    .casino-container {
+      margin: 50px;
+      padding: 20px;
+      border: 2px solid #fff;
+      border-radius: 10px;
+      background-color: #333;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+    }
+
+    .slot-machine {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 20px;
+    }
+
+    .row {
+      display: flex;
+      justify-content: space-around;
+      width: 100%;
+      transition: transform 0.5s ease-in-out;
+    }
+
+    .slot-image {
+      width: 100px;
+      height: 100px;
+      border: 2px solid #fff;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+      margin: 5px;
+      background-size: cover;
+    }
+
+    button {
+      padding: 10px 20px;
+      margin-top: 20px;
+      background-color: #4CAF50;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    .result-display {
+      margin-top: 20px;
+      font-size: 18px;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background-color: #333;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+    }
+
+    .play-again-btn {
+      padding: 10px 20px;
+      margin-top: 10px;
+      background-color: #4CAF50;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .play-again-btn:hover {
+      background-color: #45a049;
+    }
+  </style>
+</head>
+<body>
+
+<div class="casino-container">
+  <h1>Однорукий бандит</h1>
+  <label for="username">Введіть ім'я:</label>
+  <input type="text" id="username" placeholder="Ваше ім'я" required>
+  <div class="slot-machine">
+    <div class="row">
+      <div class="slot-image" style="background-image: url('');"></div>
+      <div class="slot-image" style="background-image: url('');"></div>
+      <div class="slot-image" style="background-image: url('');"></div>
+    </div>
+    <div class="row">
+      <div class="slot-image" style="background-image: url('');"></div>
+      <div class="slot-image" style="background-image: url('');"></div>
+      <div class="slot-image" style="background-image: url('');"></div>
+    </div>
+    <div class="row">
+      <div class="slot-image" style="background-image: url('');"></div>
+      <div class="slot-image" style="background-image: url('');"></div>
+      <div class="slot-image" style="background-image: url('');"></div>
+    </div>
+  </div>
+  <button onclick="startGame()">Почати гру</button>
+  <div class="result-display"></div>
+</div>
+
+<div class="modal" id="myModal">
+  <div class="modal-content">
+    <p id="modalText"></p>
+    <button class="play-again-btn" onclick="playAgain()">Грати ще раз</button>
+  </div>
+</div>
+
+<script>
+ const usernameInput = document.getElementById('username');
+const slotMachine = document.querySelector('.slot-machine');
+const resultDisplay = document.querySelector('.result-display');
+const modal = document.getElementById('myModal');
+const modalText = document.getElementById('modalText');
+
+let attempts = 0;
+
+function getRandomInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function generateImages() {
+  const imageUrls = [
+    'https://cdn3.iconfinder.com/data/icons/casino/256/Lemon-512.png',
+    'https://cdn-icons-png.flaticon.com/512/3958/3958808.png',
+    'https://cdn-icons-png.flaticon.com/512/8336/8336920.png',
+  ];
+
+  // Shuffle the array to get a random order of images
+  const shuffledImages = imageUrls.sort(() => Math.random() - 0.5);
+
+  return shuffledImages;
+}
+
+function startGame() {
+  const playerName = usernameInput.value.trim();
+
+  if (playerName === '') {
+    resultDisplay.textContent = 'Будь ласка, введіть ваше ім\'я.';
+    return;
+  }
+
+  resultDisplay.textContent = '';
+  playGame();
+}
+
+function playGame() {
+  attempts++;
+
+  if (attempts > 3) {
+    displayResult(false, true);
+    return;
+  }
+
+  const rows = document.querySelectorAll('.row');
+
+  function rollRow(row, images, delay) {
+    setTimeout(() => {
+      row.style.transform = 'translateY(-100px)';
+      setTimeout(() => {
+        row.style.transform = 'translateY(0)';
+        for (let i = 0; i < 3; i++) {
+          row.children[i].style.backgroundImage = `url('${images[i]}')`;
+        }
+      }, 400);
+    }, delay);
+  }
+
+  // Generate a unique set of images for each column
+  const columnImages = Array.from({ length: 3 }, generateImages);
+  rows.forEach((row, rowIndex) => {
+    const images = columnImages.map(column => column[rowIndex]);
+    rollRow(row, images, rowIndex * 1000);
+  });
+
+  setTimeout(() => {
+    checkResult();
+  }, 3000);
+}
+
+function checkResult() {
+  const images = document.querySelectorAll('.slot-image');
+  const symbols = Array.from(images, img => img.style.backgroundImage.slice(4, -1).replace(/"/g, ""));
+
+  // Check each row for a win
+  for (let i = 0; i < 3; i++) {
+    if (symbols[i*3] === symbols[i*3 + 1] && symbols[i*3 + 1] === symbols[i*3 + 2]) {
+      displayResult(true, false);
+      return;
+    }
+  }
+
+  playGame();
+}
+
+function displayResult(isWinner, noMoreAttempts) {
+  const message = isWinner ? 'Ви виграли! 🎉' : 'Спробуйте ще раз. 😞';
+  modalText.textContent = message;
+
+  modal.style.display = 'flex';
+
+  if (noMoreAttempts) {
+    modalText.textContent = 'Вибачте, ви використали всі спроби. Спробуйте ще раз пізніше. 😞';
+    document.querySelector('.play-again-btn').style.display = 'none';
+  }
+}
+
+function playAgain() {
+  attempts = 0;
+  modal.style.display = 'none';
+  startGame();
+}
+
+window.addEventListener('click', (event) => {
+  if (event.target === modal) {
+    closeModal();
+  }
+});
+
+window.onload = () => {
+  generateImages();
+  document.querySelector('.play-again-btn').addEventListener('click', playAgain);
+};
+
+
+</script>
+
+</body>
+</html>
